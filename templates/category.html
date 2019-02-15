@@ -1,0 +1,20 @@
+{% extends 'base_other.html' %}
+{% load staticfiles %}
+{% load blog_tags %}
+{% block page_title %}分类{% endblock page_title %}
+{% block content %}
+<div class="am-g am-g-fixed blog-fixed blog-content">
+    <div class="am-u-sm-12">
+        <h1 class="blog-text-center">-- 分类 --</h1>
+        <div class="b">
+            <ul>
+            {% get_category as category_list %}
+            {% for category in category_list %}
+                <li><a href="{% url 'time:category_query' category.id %}">{{ category }}({{ category.num_posts }})</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+        <hr>
+    </div>
+</div>
+{% endblock content %}

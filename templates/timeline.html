@@ -1,0 +1,55 @@
+{% extends 'base_other.html' %}
+{% load staticfiles %}
+{% load blog_tags %}
+{% block page_title %}存档{% endblock page_title %}
+{% block content %}
+<div class="am-g am-g-fixed blog-fixed blog-content">
+    <div class="am-u-sm-12">
+        <h1 class="blog-text-center">-- 存档 --</h1>
+        <div class="timeline-year">
+            {% get_archives as datelists %}
+            {% for date in datelists %}
+            {% ifchanged date.year %}
+                <h1>{{ date.year }}年</h1>
+            <hr>
+                <ul>
+                <h3>{{ date.month }}月</h3>
+                <hr>
+                {% for arch in archive_msg %}
+                {% if date.month == arch.add_time.month %}
+                <li>
+                    <span class="am-u-sm-4 am-u-md-2 timeline-span">{{ arch.add_time|date:"Y/m/d" }}</span>
+                    <span class="am-u-sm-8 am-u-md-6"><a href="{% url 'art:article_page' arch.id %}">{{ arch.article_title }}</a></span>
+                    <span class="am-u-sm-4 am-u-md-2 am-hide-sm-only">{{ arch.article_category.category_name }}</span>
+                    <span class="am-u-sm-4 am-u-md-2 am-hide-sm-only">{{ arch.author_name }}</span>
+                </li>
+                {% endif %}
+                {% empty %}
+                    <h1>暂无文章</h1>
+                {% endfor archive_msg %}
+                </ul>
+            {% else %}
+                <br>
+                <ul>
+                <h3>{{ date.month }}月</h3>
+                <hr>
+                {% for arch in archive_msg %}
+                {% if date.month == arch.add_time.month %}
+                <li>
+                    <span class="am-u-sm-4 am-u-md-2 timeline-span">{{ arch.add_time|date:"Y/m/d" }}</span>
+                    <span class="am-u-sm-8 am-u-md-6"><a href="{% url 'art:article_page' arch.id %}">{{ arch.article_title }}</a></span>
+                    <span class="am-u-sm-4 am-u-md-2 am-hide-sm-only">{{ arch.article_category.category_name }}</span>
+                    <span class="am-u-sm-4 am-u-md-2 am-hide-sm-only">{{ arch.author_name }}</span>
+                </li>
+                {% endif %}
+                {% empty %}
+                    <h1>暂无文章</h1>
+                {% endfor archive_msg %}
+                </ul>
+             {% endifchanged %}
+            {% endfor datelists %}
+        </div>
+        <hr>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block page_title %}首页{% endblock page_title %}
+{% block content %}
+<div class="am-u-md-8 am-u-sm-12">
+        {% for art in index_msg.object_list %}
+        <article class="am-g blog-entry-article">
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-img">
+                <img src="{% static 'i/f10_s.jpg' %}" alt="" class="am-u-sm-12">
+            </div>
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                <span><a href="{% url 'time:category_query' art.article_category.id %}" class="blog-color">{{ art.article_category.category_name }} &nbsp;</a></span>
+                <span> @{{ art.author_name }} &nbsp;</span>
+                <span>{{ art.add_time }}</span>
+                <h1><a href="{% url 'art:article_page' art.id %}">{{ art.article_title }}</a></h1>
+                <p>{{ art.article_excerpt|safe }}...</p>
+            </div>
+        </article>
+        {% endfor %}
+
+        {#分页#}
+        <ul class="am-pagination">
+           <div class="pageturn">
+                    <ul class="am-pagination">
+                        {% if index_msg.has_previous %}
+                            <li class="am-pagination-prev">
+                                <a href="?{{ index_msg.previous_page_number.querystring }}">上一页</a>
+                            </li>
+                        {% endif %}
+                        {% for page in index_msg.pages %}
+                            {% if page %}
+                                {% ifequal page index_msg.number %}
+                                     <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                                {% else %}
+                                    <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                <li class="none"><a href="">...</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if index_msg.has_next %}
+                           <li class="am-pagination-next"><a href="?{{ index_msg.next_page_number.querystring }}">下一页</a></li>
+                        {% endif %}
+                    </ul>
+            </div>
+        </ul>
+    </div>
+{% endblock content %}
