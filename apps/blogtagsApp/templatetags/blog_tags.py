@@ -3,28 +3,23 @@
 
 from django import template
 from django.db.models.aggregates import Count
-from django.core.cache import cache
 from blogInfoApp.models import BlogInfoModel
 from articleApp.models import ArticleModel, CategoryModel
+from CacheFun.blog_cache import StringCache
 from taggit.models import Tag
 
 register = template.Library()
 
 
 # 提取博客基础信息
+@StringCache('blog_info')
 def get_blog_info(num=1):
     # 查询基础信息是否有缓存
-    key = 'blog_info'
     result = ''
-    if key in cache:
-        result = cache.get(key)
-    else:
-        # 提取博客信息后，存到redis.
-        datas = BlogInfoModel.objects.filter(id=num)
-        if datas:
-            for data in datas:
-                result = data
-            cache.set(key, result, 5 * 60)
+    datas = BlogInfoModel.objects.filter(id=num)
+    if datas:
+        for data in datas:
+            result = data
     return result
 
 
@@ -83,13 +78,8 @@ def get_category():
 
 
 # 首页标签栏目
+@StringCache('tagsName_list')
 @register.simple_tag
 def get_tags():
-    key = 'tagsName_list'
-    if key in cache:
-        result = cache.get(key)
-    else:
-        result = Tag.objects.all()
-        if result:
-            cache.set(key, result, 5 * 60)
+    result = Tag.objects.all()
     return result

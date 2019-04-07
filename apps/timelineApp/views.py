@@ -2,7 +2,7 @@
 
 from django.shortcuts import render
 from django.views.generic.base import View
-from articleApp.views import get_artinfo
+from CacheFun.blog_cache import get_all_articles
 from articleApp.models import ArticleModel
 from pure_pagination import Paginator, PageNotAnInteger
 
@@ -32,7 +32,7 @@ class categoryQueryView(View):
 class timelineView(View):
     def get(self, request):
         current_page = 'timeline'
-        result = get_artinfo(mode='all', art_id='')
+        result = get_all_articles()
         return render(request, 'timeline.html', {
             'archive_msg': result,
             'current_page': current_page,

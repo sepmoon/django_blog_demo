@@ -3,84 +3,36 @@
 from django.views.generic.base import View
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound
-from django.core.cache import cache
+from CacheFun.blog_cache import StringCache, get_all_articles, get_art_id
 from django.db.models import Q
 from .models import ArticleModel
 from blogtagsApp.templatetags.blog_tags import get_tags
 from pure_pagination import Paginator, PageNotAnInteger
 
 
+# 提取指定文章的内容
+@StringCache('art')
+def get_articles(art_id):
+    art_data = get_object_or_404(ArticleModel, id=art_id)
+    return art_data
+
+# 拿指定tag的数据
+@StringCache('tag_search')
+def get_tag_search(tags_id):
+    result = ArticleModel.objects.filter(article_tags__exact=tags_id).order_by('-add_time')
+    return result
+
+
 # Create your views here.
-
-
-# 提取文章内容
-def get_artinfo(mode, art_id):
-    # 文章单页部分信息提取
-    if mode == 'filter':
-        key = 'art-{}'.format(art_id)
-        if key in cache:
-            art_data = cache.get(key)
-            return art_data
-        else:
-            art_data = get_object_or_404(ArticleModel, id=art_id)
-            cache.set(key, art_data, 5 * 60)
-            return art_data
-
-    # 首页文章信息列表全部提取
-    elif mode == 'all':
-        key = 'artlist_all'
-        if key in cache:
-            art_list_all = cache.get(key)
-        else:
-            art_list_all = []
-            art_content = ArticleModel.objects.all().order_by('-add_time')
-            if art_content:
-                for content in art_content:
-                    art_list_all.append(content)
-                cache.set(key, art_list_all, 5 * 60)
-        return art_list_all
-
-    else:
-        pass
-
-
-# 提取文章id列表
-def get_art_id():
-    id_list = []
-    key = 'artid_all'
-    if key in cache:
-        id_list = cache.get(key)
-    else:
-        results = ArticleModel.objects.all()
-        if results:
-            for result in results:
-                id_list.append(result.id)
-            cache.set(key, id_list, 5 * 60)
-    return id_list
-
 
 # tag cloud 视图
 class TagsListView(View):
     def get(self, request, tags_id):
-        key = 'tag_search-{}'.format(tags_id)
-        tags_list = ''
+        result = get_tag_search(tags_id)
         tags_result = ''
-        if key in cache:
-            result = cache.get(key)
-        else:
-            result = ArticleModel.objects.filter(article_tags__exact=tags_id).order_by('-add_time')
-            if result:
-                cache.set(key, result, 5 * 60)
 
         # 在缓存中取tags的名称
-        get_tags_name = False
-        while get_tags_name == False:
-            tags_list = cache.get('tagsName_list')
-            if tags_list:
-                get_tags_name = True
-            else:
-                # 没缓存则建立缓存
-                get_tags()
+        tags_list = get_tags()
         for tags in tags_list:
             if tags.id == int(tags_id):
                 tags_result = tags
@@ -132,7 +84,7 @@ class SearchView(View):
 class IndexView(View):
     def get(self, request):
         current_page = 'home'
-        results = get_artinfo(mode='all', art_id='')
+        results = get_all_articles()
 
         # 分页功能
         try:
@@ -151,8 +103,7 @@ class IndexView(View):
 # 单页视图
 class ArticleView(View):
     def get(self, request, art_id):
-        mode = 'filter'
-        art_data = get_artinfo(mode, art_id)
+        art_data = get_articles(art_id)
 
         # 上一篇和下一篇按钮,到顶部或者到底部的判断.
         left_top = False
