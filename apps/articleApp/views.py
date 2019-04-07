@@ -1,26 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic.base import View
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.http import HttpResponseNotFound
-from CacheFun.blog_cache import StringCache, get_all_articles, get_art_id
+from CacheFun.blog_cache import get_articles, get_all_articles, get_art_id, get_tag_search
 from django.db.models import Q
 from .models import ArticleModel
 from blogtagsApp.templatetags.blog_tags import get_tags
 from pure_pagination import Paginator, PageNotAnInteger
-
-
-# 提取指定文章的内容
-@StringCache('art')
-def get_articles(art_id):
-    art_data = get_object_or_404(ArticleModel, id=art_id)
-    return art_data
-
-# 拿指定tag的数据
-@StringCache('tag_search')
-def get_tag_search(tags_id):
-    result = ArticleModel.objects.filter(article_tags__exact=tags_id).order_by('-add_time')
-    return result
 
 
 # Create your views here.
@@ -111,7 +98,12 @@ class ArticleView(View):
 
         # 判断文章id在结果中的位置排位
         id_list = get_art_id()
-        list_position = id_list.index(int(art_id))
+        try:
+            list_position = id_list.index(int(art_id))
+        except ValueError:
+            search_response = HttpResponseNotFound(charset='gb2312')
+            search_response.content = '<h1>没有相关文章内容，请重新输入。</h1>'
+            return search_response
         try:
             # 到顶部设置left_top为True
             if list_position - 1 == -1:
