@@ -22,4 +22,4 @@
 2. 线上使用nginx+gunicorn+django+redis的组合部署(数据库使用mysql或者sqlite)
 3. xxxx
 
-![](ttps://raw.githubusercontent.com/sepmoon/django_blog_demo/master/img.png)
+![](https://raw.githubusercontent.com/sepmoon/django_blog_demo/master/img.png)
